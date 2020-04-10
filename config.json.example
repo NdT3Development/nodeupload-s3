@@ -1,0 +1,24 @@
+{
+	"filenameLength": 10,
+	"port": "8099",
+	"indexForm": true,
+	"indexFormDisabledMessage": "Hi, this is NodeUpload. The upload form here has been disabled. Change the config file to enable it.",
+	"extBlacklist": [".exe", ".sh", ".cmd", ".bat", ".html", ".htm"],
+	"ratelimitAfter": 5,
+	"ratelimitTime": 7500,
+	"logs": {
+		"enable": false,
+		"dir": "logs",
+		"file": "NodeUpload_log.txt",
+		"format": "{{ time }} | {{ log }} \n"
+	},
+	"s3": {
+		"bucket": "",
+		"s3_endpoint": "",
+		"s3_accessKeyId": "",
+		"s3_secretAccessKey": "",
+		"s3_region": "",
+		"remotePath": "",
+		"redirectToAfterUpload": ""
+	}
+}
