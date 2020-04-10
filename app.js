@@ -1,13 +1,13 @@
 /*
 Project Name: NodeUpload S3
 Project Developer: NdT3Development
-Project GitHub: https://github.com/NdT3Development/nodeupload
-Project Info: https://github.com/NdT3Development/nodeupload#node-upload
+Project GitHub: https://github.com/NdT3Development/nodeupload-s3
+Project Info: https://github.com/NdT3Development/nodeupload-s3
 
 Project License:
 MIT License
 
-Copyright (c) 2017 NdT3Development
+Copyright (c) 2020 NdT3Development
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@ SOFTWARE.
 
 var formidable = require('formidable'); // File upload
 var express = require('express'); // Web server
-//var util = require('util'); // Used for response
 var fs = require('fs'); // Used to move files
 var path = require('path'); // Used to get file directory
 var crypto = require('crypto'); // Used to generate file name
@@ -39,7 +38,6 @@ var os = require('os'); // Used to get OS tmp directory
 var RateLimit = require('express-rate-limit'); // Time to ratelimit...
 var sqlite3 = require('sqlite3'); // Database
 var mime = require('mime');
-//var createServer = require("auto-sni");
 
 var config = require('./config.json'); // Config file
 var logger = require('./logger.js').both; // Custom logger
@@ -73,7 +71,7 @@ var stillWaitingForS3 = true;
 client.listObjects({ s3Params: { Bucket: config.s3.bucket } }).on('data', function(data) {
 	var s3Objects = data.Contents;
 	for (var i = 0; i < s3Objects.length; i++) {
-		console.log(s3Objects[i].Key);
+		//console.log(s3Objects[i].Key);
 		filesInS3.push(s3Objects[i].Key);
 	}
 }).on('end', function() {
@@ -86,7 +84,7 @@ function log(m) {
 var packagejson = require('./package.json');
 var configstrings = require('./strings.json'); // Strings
 process.title = 'NodeUpload';
-log(`NodeUpload v${packagejson.version} \n Process ID: ${process.pid} \n Platform: ${os.type()} ${os.release()} ${os.arch()} ${os.platform()} \n Temporary Directory Location: ${path.join(os.tmpdir(), 'nodeupload_tmp')}`);
+log(`NodeUpload S3 v${packagejson.version} \n Process ID: ${process.pid} \n Platform: ${os.type()} ${os.release()} ${os.arch()} ${os.platform()} \n Temporary Directory Location: ${path.join(os.tmpdir(), 'nodeupload_tmp')}`);
 // Command line args for testing purposes.
 var commandargs = process.argv.splice(2);
 var command2 = commandargs[0];
@@ -105,9 +103,7 @@ fs.access(tmpFileDir, function(err) {
 		fs.mkdir(tmpFileDir, function(err) {
 			if (err) {
 				return console.error(configstrings.beforeStartConsole.tmpDirFail.replace('{{err}}', err));
-			} //else {
-			//  log('Temporary directory exists. Ready to go.')
-			//}
+			}
 		});
 	} else {
 		log(configstrings.beforeStartConsole.tmpExists);
@@ -118,18 +114,17 @@ var app = express();
 
 app.set('trust proxy', '127.0.0.1');
 
-//app.use(express.static('files')); // For serving files
-
 var db = new sqlite3.Database('./db/database.db', (err) => {
 	if (err) {
 		console.error(err.message);
+		process.exit(1);
 	}
 	log(configstrings.beforeStartConsole.dbConnect);
 });
 
 var sqlAction = `SELECT name FROM sqlite_master WHERE type='table' AND name='tokens'`;
-// eslint-disable-next-line handle-callback-err
 db.get(sqlAction, (err, row) => {
+	if (err) throw err;
 	if (!row) {
 		log(configstrings.beforeStartConsole.dbNothing);
 		db.close();
@@ -174,8 +169,8 @@ app.post('/upload', apiRatelimiter, function(req, res) {
 	var form = new formidable.IncomingForm();
 
 	form.uploadDir = tmpFileDir; // Saves tmp files in tmp dir
-	// eslint-disable-next-line handle-callback-err
 	form.parse(req, function(err, fields, files) { // Parses form for upload
+		if (err) throw err;
 		var usertoken = '';
 
 		if (fields.token) {
@@ -188,15 +183,14 @@ app.post('/upload', apiRatelimiter, function(req, res) {
 			return crypto.randomBytes(Math.ceil(length / 2))
 				.toString('hex') // convert to hexadecimal format
 				.slice(0, length); // return required number of characters
-			//return '56c4a05603';
 		}
 
 		var thisFileNameGenerationCount = 0;
 		function randomValueHex (length, fileExt) { // Generates random string for file name
 			var tmpHex = generateFileName(length);
 
-			if (filesInS3.indexOf(tmpHex + fileExt) > -1) {
-				console.log('in');
+			if (filesInS3.indexOf(tmpHex + fileExt) > -1) { // If the filename exists in S3, generate a new one
+				//console.log('in');
 				if (thisFileNameGenerationCount >= 3) {
 					return null;
 				} else {
@@ -243,17 +237,9 @@ app.post('/upload', apiRatelimiter, function(req, res) {
 						}
 
 						var fileName = fileNameWithoutExt + ext;
-						/*var newPath = path.join(tmpFileDir,fileName);
-		console.log('N:'+newPath);
-		fs.rename(tmpPath, newPath, function (err) {
-                    if (err) {
-                      throw err;
-                    }
 
-                  });*/
 						var params = {
 							localFile: tmpPath,
-							deleteRemoved: true,
 							s3Params: {
 								ACL: 'public-read',
 								Bucket: config.s3.bucket,
@@ -276,13 +262,12 @@ app.post('/upload', apiRatelimiter, function(req, res) {
 						uploader.on('end', function() {
 							console.log('done uploading');
 							filesInS3.push(fileName);
-							console.log(filesInS3);
+							//console.log(filesInS3);
 							if (config.s3.redirectToAfterUpload) {
 								res.redirect(config.s3.redirectToAfterUpload + fileName);
 							} else {
 								res.json({ success: true, message: fileName }); // Will not add an option to change this is `strings.json`
 							}
-							//log(util.inspect({fields: fields, files: files}));
 							log(configstrings.consoleStrings.uploaded.replace('{{ip}}', req.ip).replace('{{file}}', fileName).replace('{{token}}', usertoken));
 							fs.unlinkSync(tmpPath);
 						});
@@ -320,96 +305,6 @@ app.get('/', function(req, res) {
 
 	}
 });
-
-/*app.get('/admin/deletefiles', apiRatelimiter, function(req, res) { // If you want to delete all files saved in './files' directory
-
-
-  db.serialize(function() {
-    db.all(`SELECT admintoken, admin FROM tokens WHERE admin = 'true' AND admintoken = '${req.headers.admintoken}'`, function(err, adminTokens) {
-
-      if(err !== null){
-         return log(err);
-      }
-
-      log(adminTokens);
-      if (!adminTokens[0]) {
-        log(configstrings.consoleStrings.invalidAdmin.replace('{{ip}}', req.ip));
-        return res.json({"success": false, "message": configstrings.webStrings.invalidAdmin});
-      }
-      //var admintoken = config.admintoken;
-        log(configstrings.consoleStrings.dirClear.replace('{{ip}}', req.ip));
-        var fileDir = path.join(__dirname, 'files/');
-        fs.readdir(fileDir, (err, files) => {
-          if (err) {
-            throw err;
-          }
-          var delFilePath = fileDir;
-          for (const file of files) {
-            var delFile = delFilePath + file;
-            log(delFilePath + file);
-            fs.unlink(delFile, err => {
-              if (err) {
-                throw err;
-              }
-            });
-          }
-        });
-        res.json({"success": true, "message": configstrings.webStrings.filesDel});
-
-    });
-  });
-});
-
-
-app.get('/admin/deletetmp', apiRatelimiter, function(req, res) { // For when temp files are too many
-
-
-    db.serialize(function() {
-      db.all(`SELECT admintoken, admin FROM tokens WHERE admin = 'true' AND admintoken = '${req.headers.admintoken}'`, function(err, adminTokens) {
-
-        if(err !== null){
-           return log(err);
-        }
-
-        log(adminTokens);
-        if (!adminTokens[0]) {
-          log(configstrings.consoleStrings.invalidAdmin.replace('{{ip}}', req.ip));
-          return res.json({"success": false, "message": configstrings.webStrings.invalidAdmin});
-        }
-        log(configstrings.consoleStrings.tmpClear.replace('{{ip}}', req.ip));
-
-        fs.readdir(tmpFileDir, (err, files) => {
-          if (err) {
-            throw err;
-          }
-
-          for (const file of files) {
-            fs.unlink(path.join(tmpFileDir, file), err => {
-              if (err) {
-                throw err;
-              }
-            });
-          }
-        });
-        res.json({"success": true, "message": configstrings.webStrings.tmpDel});
-
-        });
-    });
-});
-
-app.get('*', function(req, res) { // 404
-    fs.access(path.join(__dirname, 'files', req.path), function(e) {
-      if (e && e.code === 'ENOENT') {
-        if (req.path === '/favicon.ico') {
-          return;
-        }
-        log(configstrings.consoleStrings.reqNoFile.replace('{{ip}}', req.ip).replace('{{file}}', req.path));
-        res.send(configstrings.webStrings.reqNoFile);
-      } else {
-        log(configstrings.consoleStrings.req.replace('{{ip}}', req.ip).replace('{{file}}', req.path));
-      }
-    });
-});*/
 
 app.listen(config.port, function() {
 	log(configstrings.consoleStrings.ready.replace('{{port}}', config.port));

@@ -20,7 +20,7 @@ nano config.json # If you want to change the default settings (you can use somet
 node app.js
 ```
 
-![InstructionsGIF](https://i.imgur.com/gMNDSZC.gif)
+![InstructionsGIF](docs/assets/img/usage.gif)
 
 ## Creating a New User
 After you are done installing and your friends also wants to use this, run the following command and answer the questions.
