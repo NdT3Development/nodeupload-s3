@@ -3,3 +3,5 @@ db/database.db
 manageUser.js
 logger.test.js
 logs
+config.json
+nodeupload.sxcu
