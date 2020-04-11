@@ -74,13 +74,9 @@ Some file extensions are blacklisted by default. These can be changed in the con
 
   NodeUpload is a Node.js server application that lets you run your own private file upload service. It uses randomly generated tokens for upload authentication.
 
-  > Does it have support for ShareX?
-
-  Yes it does! Please look at [the ShareX section of the docs](https://nodeupload.ndt3.me/#sharex-configuration) for more details.
-
   > How are uploads done?
 
-  When a user uploads a file, it will be stored in a directory in your operating system's temp directory. Then there will be a connection to the database to check that the token is valid. If it is valid, the file gets moved to the `files` directory in the app's directory.
+  When a user uploads a file, it will be stored in a directory in your operating system's temp directory. Then there will be a connection to the database to check that the token is valid. If it is valid, the file gets uploaded to S3.
 
   > How are tokens generated?
 
