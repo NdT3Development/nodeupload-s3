@@ -21,26 +21,27 @@ Rename `config.json.example` to `config.json` and then modify the settings as re
 
 | Option | Description | Required |
 |---     |---          |---       |
-| filenameLength | How long the generated file name will be | - [x] |
-| port | The port that NodeUpload S3 runs on | - [x] |
-| indexForm | If the online upload form should be shown | - [x] |
-| indexFormDisabledMessage | The message that is shown if the online upload form is disabled | - [ ] |
-| extBlacklist | Files with these extensions will not be allowed | - [x] |
-| ratelimitAfter | After this many requests in the `ratelimitTime`, rate limit requests | - [x] |
-| ratelimitTime | See `ratelimitAfter` description | - [x] |
-| logs.enable | If logs are enabled | - [x] |
-| logs.dir | The directory that logs will be saved in | - [ ]* |
-| logs.file | The file that logs will be saved in | - [ ]* |
-| logs.format | Log format | - [x] |
-| s3.bucket | S3 bucket | - [x] |
-| s3.s3_endpoint | S3 endpoint | - [x] |
-| s3.s3_accessKeyId | S3 access key | - [x] |
-| s3.s3_secretAccessKey | S3 secret key | - [x] |
-| s3.s3_region | S3 region | - [x] |
-| s3.remotePath | If you want the files to be uploaded to a different folder on S3 | - [ ] |
-| s3.redirectToAfterUpload | If you want users to be redirected to the URL of their file, insert that URL here | - [ ] |
+| filenameLength | How long the generated file name will be | Y |
+| port | The port that NodeUpload S3 runs on | Y |
+| indexForm | If the online upload form should be shown | Y |
+| indexFormDisabledMessage | The message that is shown if the online upload form is disabled | N* |
+| extBlacklist | Files with these extensions will not be allowed | Y |
+| ratelimitAfter | After this many requests in the `ratelimitTime`, rate limit requests | Y |
+| ratelimitTime | See `ratelimitAfter` description | Y |
+| logs.enable | If logs are enabled | Y |
+| logs.dir | The directory that logs will be saved in | N** |
+| logs.file | The file that logs will be saved in | N** |
+| logs.format | Log format | Y |
+| s3.bucket | S3 bucket | Y |
+| s3.s3_endpoint | S3 endpoint | Y |
+| s3.s3_accessKeyId | S3 access key | Y |
+| s3.s3_secretAccessKey | S3 secret key | Y |
+| s3.s3_region | S3 region | Y |
+| s3.remotePath | If you want the files to be uploaded to a different folder on S3 | N |
+| s3.redirectToAfterUpload | If you want users to be redirected to the URL of their file, insert that URL here | N |
 
-* These are required if `logs.enable` is set to `true`
+* Required if `indexForm` is set to `true`
+** These are required if `logs.enable` is set to `true`
 
 ## Creating a New User
 After you are done installing and your friends also want to upload files, run the following command and answer the questions.
