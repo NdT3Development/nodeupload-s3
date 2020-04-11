@@ -21,24 +21,24 @@ Rename `config.json.example` to `config.json` and then modify the settings as re
 
 | Option | Description | Required |
 |---     |---          |---       |
-| filenameLength | How long the generated file name will be | [x] |
-| port | The port that NodeUpload S3 runs on | [x] |
-| indexForm | If the online upload form should be shown | [x] |
-| indexFormDisabledMessage | The message that is shown if the online upload form is disabled | [] |
-| extBlacklist | Files with these extensions will not be allowed | [X] |
-| ratelimitAfter | After this many requests in the `ratelimitTime`, rate limit requests | [X] |
-| ratelimitTime | See `ratelimitAfter` description | [x] |
-| logs.enable | If logs are enabled | [x] |
-| logs.dir | The directory that logs will be saved in | []* |
-| logs.file | The file that logs will be saved in | []* |
-| logs.format | Log format | [x] |
-| s3.bucket | S3 bucket | [x] |
-| s3.s3_endpoint | S3 endpoint | [x] |
-| s3.s3_accessKeyId | S3 access key | [x] |
-| s3.s3_secretAccessKey | S3 secret key | [x] |
-| s3.s3_region | S3 region | [x] |
-| s3.remotePath | If you want the files to be uploaded to a different folder on S3 | [] |
-| s3.redirectToAfterUpload | If you want users to be redirected to the URL of their file, insert that URL here | [] |
+| filenameLength | How long the generated file name will be | - [x] |
+| port | The port that NodeUpload S3 runs on | - [x] |
+| indexForm | If the online upload form should be shown | - [x] |
+| indexFormDisabledMessage | The message that is shown if the online upload form is disabled | - [ ] |
+| extBlacklist | Files with these extensions will not be allowed | - [x] |
+| ratelimitAfter | After this many requests in the `ratelimitTime`, rate limit requests | - [x] |
+| ratelimitTime | See `ratelimitAfter` description | - [x] |
+| logs.enable | If logs are enabled | - [x] |
+| logs.dir | The directory that logs will be saved in | - [ ]* |
+| logs.file | The file that logs will be saved in | - [ ]* |
+| logs.format | Log format | - [x] |
+| s3.bucket | S3 bucket | - [x] |
+| s3.s3_endpoint | S3 endpoint | - [x] |
+| s3.s3_accessKeyId | S3 access key | - [x] |
+| s3.s3_secretAccessKey | S3 secret key | - [x] |
+| s3.s3_region | S3 region | - [x] |
+| s3.remotePath | If you want the files to be uploaded to a different folder on S3 | - [ ] |
+| s3.redirectToAfterUpload | If you want users to be redirected to the URL of their file, insert that URL here | - [ ] |
 
 * These are required if `logs.enable` is set to `true`
 
