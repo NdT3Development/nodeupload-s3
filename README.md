@@ -40,7 +40,7 @@ Rename `config.json.example` to `config.json` and then modify the settings as re
 | s3.remotePath | If you want the files to be uploaded to a different folder on S3 | N |
 | s3.redirectToAfterUpload | If you want users to be redirected to the URL of their file, insert that URL here | N |
 
-* Required if `indexForm` is set to `true`
+\* Required if `indexForm` is set to `true`
 
 ** These are required if `logs.enable` is set to `true`
 
