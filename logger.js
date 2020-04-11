@@ -7,7 +7,7 @@ Project Info: https://github.com/NdT3Development/nodeupload#node-upload
 Project License:
 MIT License
 
-Copyright (c) 2017 NdT3Development
+Copyright (c) 2020 NdT3Development
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,44 +35,44 @@ var config = require('./config.json');
 //console.log(moment().format());
 
 exports.console = function (f, m) {
-  console.log(f.logFormat.replace('{{ time }}', moment().format()).replace('{{ log }}', m));
+	console.log(f.logFormat.replace('{{ time }}', moment().format()).replace('{{ log }}', m));
 };
 exports.file = function (f, m) {
 	if (!config.logs.enable) return;
-  var dir;
-  var p;
+	var dir;
+	var p;
 
-  function log() {
-    setTimeout(function () {
-      var file = fs.createWriteStream(p, {flags: 'a'});
-      file.write(f.logFormat.replace('{{ time }}', moment().format()).replace('{{ log }}', m) + '\n');
-      //console.log(p);
-    }, 50);
-  }
+	function log() {
+		setTimeout(function () {
+			var file = fs.createWriteStream(p, {flags: 'a'});
+			file.write(f.logFormat.replace('{{ time }}', moment().format()).replace('{{ log }}', m) + '\n');
+			//console.log(p);
+		}, 50);
+	}
 
-  if (f.dir) {
-    dir = path.join(__dirname, f.dir);
-    fs.access(dir, function(err) {
-      if (err && err === 'ENOENT') {
-        console.log("Creating logs directory now...");
-        fs.mkdir(dir, function(err) {
-          if (err) {
-            return console.error("Error " + err);
-          }
-        });
-      }
+	if (f.dir) {
+		dir = path.join(__dirname, f.dir);
+		fs.access(dir, function(err) {
+			if (err && err === 'ENOENT') {
+				console.log("Creating logs directory now...");
+				fs.mkdir(dir, function(err) {
+					if (err) {
+						return console.error("Error " + err);
+					}
+				});
+			}
 
-    });
+		});
 
-    p = path.join(dir, f.file);
-    log();
-  } else {
-    p = path.join(__dirname, f.file);
-    log();
-  }
+		p = path.join(dir, f.file);
+		log();
+	} else {
+		p = path.join(__dirname, f.file);
+		log();
+	}
 };
 
 exports.both = function(f, m) {
-  exports.console(f, m);
-  exports.file(f, m);
+	exports.console(f, m);
+	exports.file(f, m);
 }

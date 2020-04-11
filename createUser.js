@@ -37,92 +37,73 @@ var packagejson = require('./package.json');
 var config = require('./config.json');
 var logger = require('./logger.js').both;
 var logConf = {
-  dir: config.logs.dir,
-  file: config.logs.file,
-  logFormat: config.logs.format
-}
+	dir: config.logs.dir,
+	file: config.logs.file,
+	logFormat: config.logs.format
+};
 function log(m) {
-  logger(logConf, m);
+	logger(logConf, m);
 }
 
 process.title = 'NodeUpload User Creation';
-log(`NodeUpload v${packagejson.version} User Creation \n Process ID: ${process.pid} \n Platform: ${os.type()} ${os.release()} ${os.arch()} ${os.platform()}`);
+log(`NodeUpload S3 v${packagejson.version} User Creation \n Process ID: ${process.pid} \n Platform: ${os.type()} ${os.release()} ${os.arch()} ${os.platform()}`);
 var db = new sqlite3.Database('./db/database.db', (err) => {
-  if (err) {
-    console.error(err.message);
-  }
-  log(configstrings.beforeStartConsole.dbConnect);
+	if (err) {
+		console.error(err.message);
+	}
+	log(configstrings.beforeStartConsole.dbConnect);
 });
 
 setTimeout(function () { // Because I don't know what else to do to stop it from trying to connect while asking questions and making the questions not work
-  var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
+	var rl = readline.createInterface({
+		input: process.stdin,
+		output: process.stdout
+	});
 
-  var email;
-  var token;
-  var enabled;
-  var admin;
-  var admintoken;
-  log(configstrings.userCreate.userCreate);
+	var email;
+	var token;
+	var enabled;
+	log(configstrings.userCreate.userCreate);
 
-  function startDB() {
-    db.serialize(function() {
-      db.run("CREATE TABLE IF NOT EXISTS tokens (email TEXT, token TEXT, enabled TEXT, admin TEXT, admintoken TEXT)");
-      log(email);
+	function startDB() {
+		db.serialize(function() {
+			db.run('CREATE TABLE IF NOT EXISTS tokens (email TEXT, token TEXT, enabled TEXT)');
+			log(email);
 
-      db.all(`SELECT * FROM tokens WHERE email = '${email}'`, function(err, allRows) {
-          if (!allRows[0]) {
-            var stmt = db.prepare("INSERT INTO tokens (email, token, enabled, admin, admintoken) VALUES (?, ?, ?, ?, ?)");
-            stmt.run(email, token, enabled, admin, admintoken);
-            stmt.finalize();
-          } else {
-            return log("Already exists in database");
-          }
-          db.close();
-      });
-
-
-      });
-
-  }
-
-  rl.question(configstrings.userCreate.email, function(answer) {
-
-    email = answer;
-    token = uuid.v4();
-    enabled = true;
-
-    rl.question(configstrings.userCreate.admin, function(answer) {
-      admin = answer;
-      //log('Admin: ' + admin);
-
-      if (admin === "true" || admin === "false") {
-
-        if (admin === "true") {
-          admintoken = uuid.v4();
-        }
-      } else {
-        return log(configstrings.userCreate.incorrect);
-      }
-
-      log(configstrings.userCreate.output
-        .replace('{{email}}', email)
-        .replace('{{token}}', token)
-        .replace('{{enabled}}', enabled)
-        .replace('{{admin}}', admin)
-        .replace('{{admintoken}}', admintoken));
-
-      rl.on('close', () => {
-        startDB();
-      });
-    rl.close();
-
-    });
-  });
+			db.all(`SELECT * FROM tokens WHERE email = '${email}'`, function(err, allRows) {
+				if (err) throw err;
+				if (!allRows[0]) {
+					var stmt = db.prepare('INSERT INTO tokens (email, token, enabled) VALUES (?, ?, ?)');
+					stmt.run(email, token, enabled);
+					stmt.finalize();
+				} else {
+					return log('Already exists in database');
+				}
+				db.close();
+			});
 
 
+		});
 
+	}
+
+	rl.question(configstrings.userCreate.email, function(answer) {
+
+		email = answer;
+		token = uuid.v4();
+		enabled = true;
+
+
+		log(configstrings.userCreate.output
+			.replace('{{email}}', email)
+			.replace('{{token}}', token)
+			.replace('{{enabled}}', enabled));
+
+		rl.on('close', () => {
+			startDB();
+		});
+		rl.close();
+
+	});
 
 }, 500);

@@ -39,7 +39,7 @@
     "email": "Email: ",
     "admin": "Admin (true/false): ",
     "incorrect": "Incorrect option",
-    "output": "Email: {{email}} \n Token: {{token}} \n Enabled: {{enabled}} \n Admin: {{admin}} \n Admin Token: {{admintoken}}"
+    "output": "Email: {{email}} \n Token: {{token}} \n Enabled: {{enabled}}"
   },
   "manageUser": {
     "NOTE_TO_YOU": "THIS  IS FOR A FUTURE UPDATE, DO NOT WORRY ABOUT THIS PART FOR NOW",

@@ -112,8 +112,6 @@ fs.access(tmpFileDir, function(err) {
 
 var app = express();
 
-app.set('trust proxy', '127.0.0.1');
-
 var db = new sqlite3.Database('./db/database.db', (err) => {
 	if (err) {
 		console.error(err.message);

@@ -1,29 +1,74 @@
-# NodeUpload
+# NodeUpload S3
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9053e5d3bcba40839645b3c193434329)](https://www.codacy.com/app/NdT3Development/nodeupload?utm_source=github.com&utm_medium=referral&utm_content=NdT3Development/nodeupload&utm_campaign=badger)
-[![Known Vulnerabilities](https://snyk.io/test/github/ndt3development/nodeupload/badge.svg)](https://snyk.io/test/github/ndt3development/nodeupload)
+NodeUpload S3 is a version of NodeUpload that allows you to use S3 to store files.
 
 ###### (Yeah, not the best name but I can't think of good names)
 Decided to start from scratch using a different dependency for uploading. Basics are working and I think it is ready for running in a production environment.
 
-**All screenshots use the tokens from the first GIF under the installing section. The screenshots may not be up to date so don't worry if the output in console looks slightly different.**
-
 ## Installing
 Should be easy to install and use
 
-You will need Git and Node **v8+**
-
 ```sh
 npm install
+nano config.json # Configure NodeUpload (you can use something other than nano for this)
 node createUser.js # This is the script for creating users
-nano config.json # If you want to change the default settings (you can use something other than nano for this)
 node app.js
 ```
 
-![InstructionsGIF](docs/assets/img/usage.gif)
+## Configuration
+
+Rename `config.json.example` to `config.json` and then modify the settings as required:
+
+{
+	"filenameLength": 10,
+	"port": "8099",
+	"indexForm": true,
+	"indexFormDisabledMessage": "Hi, this is NodeUpload. The upload form here has been disabled. Change the config file to enable it.",
+	"extBlacklist": [".exe", ".sh", ".cmd", ".bat", ".html", ".htm"],
+	"ratelimitAfter": 5,
+	"ratelimitTime": 7500,
+	"logs": {
+		"enable": false,
+		"dir": "logs",
+		"file": "NodeUpload_log.txt",
+		"format": "{{ time }} | {{ log }} \n"
+	},
+	"s3": {
+		"bucket": "",
+		"s3_endpoint": "",
+		"s3_accessKeyId": "",
+		"s3_secretAccessKey": "",
+		"s3_region": "",
+		"remotePath": "",
+		"redirectToAfterUpload": ""
+	}
+}
+
+| Option | Description | Required |
+|---     |---          |---       |
+| filenameLength | How long the generated file name will be | [x] |
+| port | The port that NodeUpload S3 runs on | [x] |
+| indexForm | If the online upload form should be shown | [x] |
+| indexFormDisabledMessage | The message that is shown if the online upload form is disabled | [] |
+| extBlacklist | Files with these extensions will not be allowed | [x] |
+| ratelimitAfter | After this many requests in the `ratelimitTime`, rate limit requests | [x] |
+| ratelimitTime | See `ratelimitAfter` description | [x] |
+| logs.enable | If logs are enabled | [x] |
+| logs.dir | The directory that logs will be saved in | []* |
+| logs.file | The file that logs will be saved in | []* |
+| logs.format | Log format | [x] |
+| s3.bucket | S3 bucket | [x] |
+| s3.s3_endpoint | S3 endpoint | [x] |
+| s3.s3_accessKeyId | S3 access key | [x] |
+| s3.s3_secretAccessKey | S3 secret key | [x] |
+| s3.s3_region | S3 region | [x] |
+| s3.remotePath | If you want the files to be uploaded to a different folder on S3 | [] |
+| s3.redirectToAfterUpload | If you want users to be redirected to the URL of their file, insert that URL here | [] |
+
+* These are required if `logs.enable` is set to `true`
 
 ## Creating a New User
-After you are done installing and your friends also wants to use this, run the following command and answer the questions.
+After you are done installing and your friends also want to upload files, run the following command and answer the questions.
 
 ```sh
 node createUser.js
@@ -36,7 +81,7 @@ Once the server has started, open a web browser to `YOUR_IP:PORT` (where `PORT` 
 
 If everything worked, it should show an upload form (unless disabled in the config file). Just add your token where it says `Token`, choose a file to upload, then click the button. It should upload. If not, check the console for errors. You may need to open an issue here.
 
-![UsageGIF](https://i.imgur.com/bZqbH0t.png)
+![Usage GIF](docs/assets/img/usage.gif)
 
 Some file extensions are blacklisted by default. These can be changed in the config file.
 - .exe
@@ -46,31 +91,15 @@ Some file extensions are blacklisted by default. These can be changed in the con
 - .cmd
 - .sh
 
-### Admin Tools
-
-There are also some admin tools (currently, deleting files and temporary files). These require an admin token which you get from answering `true` to the `Admin` question when running `createUser.js`.
-
-You will need to use a program that can send headers with a GET request. I prefer using [Postman](https://getpostman.com).
-
- **Delete files in 'files' directory:**
-  - Make a GET request to `YOUR_IP:PORT/admin/deletefiles` including a header with your admin token with the name `admintoken`.
-
-  ![DeleteFiles](https://i.imgur.com/aVtL3d7.png)
-
-  **Delete files in temporary directory (`OPERATING_SYSTEM_TMP/nodeupload_tmp/`)**
-  - Make a GET request to `YOUR_IP:PORT/admin/deletetmp` including a header with your admin token with the name `admintoken`.
-
-  ![DeleteTMP](https://i.imgur.com/XXUjU38.png)
-
 ## FAQs
 
   > What is this?
 
-  NodeUpload is a Node.js server application that lets you run your own private file upload service. It uses randomly generated tokens for upload authentication and includes some admin features that require an admin token (which are generated when running  `createUser.js` and answering `true` to the `Admin` question).
+  NodeUpload is a Node.js server application that lets you run your own private file upload service. It uses randomly generated tokens for upload authentication.
 
   > Does it have support for ShareX?
 
-  Yes it does! Please look at [the ShareX section of the docs](https://nodeupload.ndt3.ml/#sharex-configuration) for more details.
+  Yes it does! Please look at [the ShareX section of the docs](https://nodeupload.ndt3.me/#sharex-configuration) for more details.
 
   > How are uploads done?
 
@@ -78,15 +107,7 @@ You will need to use a program that can send headers with a GET request. I prefe
 
   > How are tokens generated?
 
-  Tokens generated are **not** based on any information given when running `createUser.js`. The information there is only used to be stored in the database. The token is generated by the [`uuid` module](https://www.npmjs.com/package/uuid) (`uuid/v4`) to generate a completely random token.
-
-  > What is the difference between a token and an admin token?
-
-  A token (or upload token) is used for uploading files where an admin token is used for things like deleting files. An admin token cannot be used to upload and an upload token cannot be used for admin actions.
-
-  > Why can a user with an admin token still do admin actions after their token has been disabled.
-
-  Currently there is not a check for enabled accounts when doing admin actions. Uploads for disabled accounts will still be blocked however admin actions won't.
+  Tokens generated are not based on any information given when running `createUser.js`. The information there is only used to be stored in the database. The token is generated by the [`uuid` module](https://www.npmjs.com/package/uuid) (`uuid/v4`) to generate a completely random token.
 
   > Does it check for information already existing in the database when running `createUser.js`?
 
@@ -102,7 +123,7 @@ You will need to use a program that can send headers with a GET request. I prefe
 
   > Is there any way to change the responses (console output, web responses, etc.)?
 
-  Yes, there is. Edit the `strings.json` file. The placeholders (`{{placeholder}}`) in these cannot be used in all strings. The code will have to be changed if you want to add these into strings that do not have support for it. Please see [the docs](https://nodeupload.ndt3.ml) for more details.
+  Yes, there is. Edit the `strings.json` file. The placeholders (`{{placeholder}}`) in these cannot be used in all strings. The code will have to be changed if you want to add these into strings that do not have support for it. Note that not all strings can be changed. Please see [the docs](https://nodeupload.ndt3.me) for more details.
 
   > Can I contribute to the development of NodeUpload by opening pull requests?
 
@@ -116,57 +137,10 @@ You will need to use a program that can send headers with a GET request. I prefe
 
   Yes, I am open to feedback and feature requests. Just open an issue using the format [here](https://github.com/NdT3Development/nodeupload/blob/master/FEATURE_REQUESTS.md)
 
-  > Why was NodeUpload only 'production ready' in version 4.0.0?
-
-  Decided not to use v0.x.x as the development version numbers as NodeUpload was probably production ready with a few changes to the code. Other reason: I don't actually know why I did it like this... ¯\\\_(ツ)\_/¯
-
-  > Console full of errors... How do I get this working?
-
-  Go to the [`Errors and Solutions`](#errors-and-solutions) section below
-
-## Errors and Solutions
-You may come across some of these while using this.
-
-- `EACCES` (Permission denied): Make sure that you have permissions to access files in that directory.
-
-- `EADDRINUSE` (Address already in use):
-![NodeEADDRINUSE](https://i.imgur.com/gjOM9Vp.png)
-
-  Make sure that there is no application running that is using that port. If you don't know what process is using the port, run the following **(LINUX ONLY)** `netstat -peanut | grep 'PORT_HERE'` then run `kill 'PROCESS_ID'` (The process ID will be in a format like `12345/process`)
-
-  ![KillProcess](https://i.imgur.com/zlgFpew.png)
-
-- `ENOENT` (No such file or directory):
-![NoNodeUploadTMP](https://i.imgur.com/lxe00fe.png)
-
-  You should not find this as NodeUpload should automatically create a new temporary directory if none is found. However, if you do find this issue, make a new directory named `nodeupload_tmp` in your operating system's temporary file directory. (If the error says it is missing the temporary directory.)
-
-- `ENOENT` after installing dependencies: You may see an error that looks like this after installing the dependencies:
-![SQLiteENOENT](https://i.imgur.com/bhJ7BbG.png)
-
-  To fix this, delete the `node_modules` directory and run `npm install` again.
-
-- `The program 'node' is currently not installed.`
-![NodeNotInstall](https://i.imgur.com/xUHT8FJ.png)
-
-  Follow the instructions [here](https://nodejs.org/en/download/package-manager/)
-
-- `The program 'npm' is currently not installed.`
-
-  Same as above.
-
-- `Error: Cannot find module`
-
-  ![NodeModule](https://i.imgur.com/YjtkIqQ.png)
-
-    Run `npm install` in the terminal
-
-  **For other errors, search for the error online or open an issue**
-
 ## LICENSE
 MIT License
 
-Copyright (c) 2017 NdT3Development
+Copyright (c) 2020 NdT3Development
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
