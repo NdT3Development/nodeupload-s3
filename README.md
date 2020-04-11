@@ -19,39 +19,14 @@ node app.js
 
 Rename `config.json.example` to `config.json` and then modify the settings as required:
 
-{
-	"filenameLength": 10,
-	"port": "8099",
-	"indexForm": true,
-	"indexFormDisabledMessage": "Hi, this is NodeUpload. The upload form here has been disabled. Change the config file to enable it.",
-	"extBlacklist": [".exe", ".sh", ".cmd", ".bat", ".html", ".htm"],
-	"ratelimitAfter": 5,
-	"ratelimitTime": 7500,
-	"logs": {
-		"enable": false,
-		"dir": "logs",
-		"file": "NodeUpload_log.txt",
-		"format": "{{ time }} | {{ log }} \n"
-	},
-	"s3": {
-		"bucket": "",
-		"s3_endpoint": "",
-		"s3_accessKeyId": "",
-		"s3_secretAccessKey": "",
-		"s3_region": "",
-		"remotePath": "",
-		"redirectToAfterUpload": ""
-	}
-}
-
 | Option | Description | Required |
 |---     |---          |---       |
 | filenameLength | How long the generated file name will be | [x] |
 | port | The port that NodeUpload S3 runs on | [x] |
 | indexForm | If the online upload form should be shown | [x] |
 | indexFormDisabledMessage | The message that is shown if the online upload form is disabled | [] |
-| extBlacklist | Files with these extensions will not be allowed | [x] |
-| ratelimitAfter | After this many requests in the `ratelimitTime`, rate limit requests | [x] |
+| extBlacklist | Files with these extensions will not be allowed | [X] |
+| ratelimitAfter | After this many requests in the `ratelimitTime`, rate limit requests | [X] |
 | ratelimitTime | See `ratelimitAfter` description | [x] |
 | logs.enable | If logs are enabled | [x] |
 | logs.dir | The directory that logs will be saved in | []* |
