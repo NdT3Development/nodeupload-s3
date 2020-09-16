@@ -96,24 +96,24 @@ Some file extensions are blacklisted by default. These can be changed in the con
 
   > Is there any way to change the responses (console output, web responses, etc.)?
 
-  Yes, there is. Edit the `strings.json` file. The placeholders (`{{placeholder}}`) in these cannot be used in all strings. The code will have to be changed if you want to add these into strings that do not have support for it. Note that not all strings can be changed. Please see [the docs](https://nodeupload.ndt3.me) for more details.
+  Yes, there is. Edit the `strings.json` file. The placeholders (`{{placeholder}}`) in these cannot be used in all strings. The code will have to be changed if you want to add these into strings that do not have support for it. Note that not all strings can be changed. Please see [the docs](https://nodeupload.truewinter.dev) for more details.
 
   > Can I contribute to the development of NodeUpload by opening pull requests?
 
-  Yes, you can open a pull request but please use the format [here](https://github.com/NdT3Development/nodeupload/blob/master/PULL_REQUESTS.md)
+  Yes, you can open a pull request but please use the format [here](https://github.com/TrueWinter/nodeupload-s3/blob/master/PULL_REQUESTS.md)
 
   > I found a bug, how do I report it?
 
-  To report a bug, open an issue using the format [here](https://github.com/NdT3Development/nodeupload/blob/master/BUGS.md)
+  To report a bug, open an issue using the format [here](https://github.com/TrueWinter/nodeupload-s3/blob/master/BUGS.md)
 
   > Can I request a feature?
 
-  Yes, I am open to feedback and feature requests. Just open an issue using the format [here](https://github.com/NdT3Development/nodeupload/blob/master/FEATURE_REQUESTS.md)
+  Yes, I am open to feedback and feature requests. Just open an issue using the format [here](https://github.com/TrueWinter/nodeupload-s3/blob/master/FEATURE_REQUESTS.md)
 
 ## LICENSE
 MIT License
 
-Copyright (c) 2020 NdT3Development
+Copyright (c) 2020 TrueWinter
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
