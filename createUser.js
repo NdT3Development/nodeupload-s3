@@ -1,13 +1,12 @@
 /*
-Project Name: NodeUpload
-Project Developer: NdT3Development
-Project GitHub: https://github.com/NdT3Development/nodeupload
-Project Info: https://github.com/NdT3Development/nodeupload#node-upload
+Project Name: NodeUpload-S3
+Project Developer: TrueWinter
+Project GitHub: https://github.com/TrueWinter/nodeupload-s3
 
 Project License:
 MIT License
 
-Copyright (c) 2017 NdT3Development
+Copyright (c) 2017 TrueWinter
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +32,8 @@ var readline = require('readline');
 var sqlite3 = require('sqlite3');
 var configstrings = require('./strings.json');
 var os = require('os');
+var bcrypt = require('bcrypt');
+
 var packagejson = require('./package.json');
 var config = require('./config.json');
 var logger = require('./logger.js').both;
@@ -41,8 +42,18 @@ var logConf = {
 	file: config.logs.file,
 	logFormat: config.logs.format
 };
+
 function log(m) {
 	logger(logConf, m);
+}
+
+function uuidToBase64(uuid) {
+	var base64 = Buffer.from(uuid.replace(/-/g, ''), 'hex').toString('base64');
+
+	return base64
+		.replace(/\+/g, '-')
+		.replace(/\//g, '_')
+		.replace(/=/g, '');
 }
 
 process.title = 'NodeUpload User Creation';
@@ -62,19 +73,20 @@ setTimeout(function () { // Because I don't know what else to do to stop it from
 
 	var email;
 	var token;
+	var tokenSecret;
 	var enabled;
 	log(configstrings.userCreate.userCreate);
 
 	function startDB() {
 		db.serialize(function() {
-			db.run('CREATE TABLE IF NOT EXISTS tokens (email TEXT, token TEXT, enabled TEXT)');
-			log(email);
+			db.run('CREATE TABLE IF NOT EXISTS tokens (email TEXT, token TEXT, tokenSecret TEXT, enabled TEXT)');
 
-			db.all(`SELECT * FROM tokens WHERE email = '${email}'`, function(err, allRows) {
+			db.all('SELECT * FROM tokens WHERE email = ?', email, function(err, allRows) {
 				if (err) throw err;
 				if (!allRows[0]) {
-					var stmt = db.prepare('INSERT INTO tokens (email, token, enabled) VALUES (?, ?, ?)');
-					stmt.run(email, token, enabled);
+					var hashedSecret = bcrypt.hashSync(tokenSecret, 10);
+					var stmt = db.prepare('INSERT INTO tokens (email, token, tokenSecret, enabled) VALUES (?, ?, ?, ?)');
+					stmt.run(email, token, hashedSecret, enabled);
 					stmt.finalize();
 				} else {
 					return log('Already exists in database');
@@ -90,13 +102,13 @@ setTimeout(function () { // Because I don't know what else to do to stop it from
 	rl.question(configstrings.userCreate.email, function(answer) {
 
 		email = answer;
-		token = uuid.v4();
+		token = uuidToBase64(uuid.v4());
+		tokenSecret = uuidToBase64(uuid.v4());
 		enabled = true;
-
 
 		log(configstrings.userCreate.output
 			.replace('{{email}}', email)
-			.replace('{{token}}', token)
+			.replace('{{token}}', `${token}.${tokenSecret}`)
 			.replace('{{enabled}}', enabled));
 
 		rl.on('close', () => {

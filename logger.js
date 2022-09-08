@@ -1,13 +1,12 @@
 /*
-Project Name: NodeUpload
-Project Developer: NdT3Development
-Project GitHub: https://github.com/NdT3Development/nodeupload
-Project Info: https://github.com/NdT3Development/nodeupload#node-upload
+Project Name: NodeUpload-S3
+Project Developer: TrueWinter
+Project GitHub: https://github.com/TrueWinter/nodeupload-s3
 
 Project License:
 MIT License
 
-Copyright (c) 2020 NdT3Development
+Copyright (c) 2020 TrueWinter
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

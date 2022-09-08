@@ -1,13 +1,12 @@
 /*
 Project Name: NodeUpload S3
-Project Developer: NdT3Development
-Project GitHub: https://github.com/NdT3Development/nodeupload-s3
-Project Info: https://github.com/NdT3Development/nodeupload-s3
+Project Developer: TrueWinter
+Project GitHub: https://github.com/TrueWinter/nodeupload-s3
 
 Project License:
 MIT License
 
-Copyright (c) 2020 NdT3Development
+Copyright (c) 2020 TrueWinter
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +37,7 @@ var os = require('os'); // Used to get OS tmp directory
 var RateLimit = require('express-rate-limit'); // Time to ratelimit...
 var sqlite3 = require('sqlite3'); // Database
 var mime = require('mime');
+var bcrypt = require('bcrypt');
 
 var config = require('./config.json'); // Config file
 var logger = require('./logger.js').both; // Custom logger
@@ -177,6 +177,11 @@ app.post('/upload', apiRatelimiter, function(req, res) {
 			usertoken = req.headers.token;
 		}
 
+		if (!usertoken || !usertoken.includes('.')) {
+			log(configstrings.consoleStrings.invalidToken.replace('{{ip}}', req.ip));
+			return res.json({ success: false, message: configstrings.webStrings.invalidToken });
+		}
+
 		function generateFileName(length) {
 			return crypto.randomBytes(Math.ceil(length / 2))
 				.toString('hex') // convert to hexadecimal format
@@ -200,10 +205,10 @@ app.post('/upload', apiRatelimiter, function(req, res) {
 				return tmpHex;
 			}
 		}
+
 		function startDB() {
 			db.serialize(function() {
-				log(usertoken);
-				db.all(`SELECT token, enabled FROM tokens WHERE token = '${usertoken}'`, function(err, allRows) {
+				db.all('SELECT token, tokenSecret, enabled FROM tokens WHERE token = ?', usertoken.split('.')[0], function(err, allRows) {
 
 					if (err !== null) {
 						return log(err);
@@ -213,22 +218,30 @@ app.post('/upload', apiRatelimiter, function(req, res) {
 						log(configstrings.consoleStrings.invalidToken.replace('{{ip}}', req.ip));
 						return res.json({ success: false, message: configstrings.webStrings.invalidToken });
 					}
+
 					if (allRows[0].enabled === '1') {
-						//continueUpload = true;
-						if (files.upload.name === '') {
+						var tokenSecret = usertoken.split('.')[1];
+						var tokenSecretHash = allRows[0].tokenSecret;
+
+						if (!bcrypt.compareSync(tokenSecret, tokenSecretHash)) {
+							log(configstrings.consoleStrings.invalidToken.replace('{{ip}}', req.ip));
+							return res.json({ success: false, message: configstrings.webStrings.invalidToken });
+						}
+
+						if (!files.upload || files.upload.name === '') {
 							log(configstrings.consoleStrings.noFile.replace('{{ip}}', req.ip));
 							return res.json({ success: false, message: configstrings.webStrings.noFile });
 						}
+
 						var tmpPath = files.upload.path; // Gets location of tmp file
-						log(tmpPath);
+
 						var ext = require('path').extname(files.upload.name); // Gets file extension
 						if (config.extBlacklist.indexOf(ext) >= 0) {
 							log(configstrings.consoleStrings.blacklistExt.replace('{{ip}}', req.ip));
 							return res.json({ success: false, message: configstrings.webStrings.blacklisted });
 						}
-						log(ext);
-						var fileMime = mime.getType(ext);
 
+						var fileMime = mime.getType(ext);
 						var fileNameWithoutExt = randomValueHex(config.filenameLength, ext);
 						if (!fileNameWithoutExt) {
 							return res.json({ success: false, message: 'Unable get file name. Please try again.' });
@@ -252,21 +265,18 @@ app.post('/upload', apiRatelimiter, function(req, res) {
 							console.error('unable to upload:', err.stack);
 							res.json({ success: false, message: 'Unable to upload to S3' }); // Will not add an option to change this in `strings.json`
 						});
-						// eslint-disable-next-line max-nested-callbacks
-						uploader.on('progress', function() {
-							console.log('progress', uploader.progressAmount, uploader.progressTotal);
-						});
+
 						// eslint-disable-next-line max-nested-callbacks
 						uploader.on('end', function() {
-							console.log('done uploading');
 							filesInS3.push(fileName);
-							//console.log(filesInS3);
+
 							if (config.s3.redirectToAfterUpload) {
 								res.redirect(config.s3.redirectToAfterUpload + fileName);
 							} else {
-								res.json({ success: true, message: fileName }); // Will not add an option to change this is `strings.json`
+								res.json({ success: true, message: fileName }); // Will not add an option to change this in `strings.json`
 							}
-							log(configstrings.consoleStrings.uploaded.replace('{{ip}}', req.ip).replace('{{file}}', fileName).replace('{{token}}', usertoken));
+
+							log(configstrings.consoleStrings.uploaded.replace('{{ip}}', req.ip).replace('{{file}}', fileName).replace('{{token}}', allRows[0].token));
 							fs.unlinkSync(tmpPath);
 						});
 

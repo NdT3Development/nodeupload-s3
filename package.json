@@ -1,33 +1,28 @@
 {
-  "name": "nodeupload",
-  "version": "5.1.1",
-  "description": "Simple file uploader in Node.js using tokens as upload authentication",
+  "name": "nodeupload-s3",
+  "version": "5.2.1",
+  "description": "Simple file uploader in Node.js which uploads files to S3, or an S3-compatible service",
   "main": "index.js",
   "scripts": {
-    "test": "eslint app.js",
-    "testfile": "eslint",
-    "testboth": "eslint app.js && eslint createUser.js && jshint app.js && jshint createUser.js",
     "start": "node app.js",
     "createuser": "node createUser.js"
   },
   "keywords": [],
-  "homepage": "https://github.com/NdT3Development/nodeupload",
+  "homepage": "https://github.com/TrueWnter/nodeupload-s3",
   "bugs": {
-    "url": "https://github.com/NdT3Development/nodeupload/issues"
+    "url": "https://github.com/TrueWnter/nodeupload-s3/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/NdT3Development/nodeupload.git"
+    "url": "https://github.com/TrueWnter/nodeupload-s3.git"
   },
-  "author": "NdT3Development",
+  "author": "TrueWnter",
   "license": "MIT",
   "dependencies": {
-    "auto-sni": "^2.3.2",
+    "bcrypt": "^5.0.1",
     "express": "^4.15.4",
     "express-rate-limit": "^2.9.0",
     "formidable": "^1.1.1",
-    "fs": "0.0.1-security",
-    "greenlock-express": "^2.7.14",
     "mime": "^2.4.4",
     "moment": "^2.19.3",
     "os": "^0.1.1",
